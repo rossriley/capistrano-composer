@@ -2,6 +2,7 @@ set :composer_install_flags, '--no-dev --prefer-dist --no-scripts --quiet --opti
 set :composer_roles, :all
 set :composer_dump_autoload_flags, '--optimize'
 set :composer_download_url, "https://getcomposer.org/installer"
+SSHKit.config.command_map[:composer] = fetch(:shared_path).join("composer.phar")
 
 namespace :composer do
   desc <<-DESC
