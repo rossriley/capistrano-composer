@@ -1,3 +1,8 @@
+set :composer_install_flags, '--no-dev --prefer-dist --no-scripts --quiet --optimize-autoloader'
+set :composer_roles, :all
+set :composer_dump_autoload_flags, '--optimize'
+set :composer_download_url, "https://getcomposer.org/installer"
+
 namespace :composer do
   desc <<-DESC
     Installs composer.phar to the shared directory
