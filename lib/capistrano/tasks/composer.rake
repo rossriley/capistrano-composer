@@ -57,7 +57,6 @@ namespace :composer do
     invoke "composer:run", :selfupdate, fetch(:composer_version, '')
   end
 
-  before 'deploy:updated', 'composer:install'
 end
 
 namespace :load do
