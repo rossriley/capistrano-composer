@@ -1,26 +1,13 @@
-set :composer_install_flags, '--no-dev --prefer-dist --no-scripts --quiet --optimize-autoloader'
-set :composer_roles, :all
-set :composer_dump_autoload_flags, '--optimize'
-set :composer_download_url, "https://getcomposer.org/installer"
-SSHKit.config.command_map[:composer] = fetch(:shared_path).join("composer.phar")
-
 namespace :composer do
-  desc <<-DESC
-    Installs composer.phar to the shared directory
-    In order to use the .phar file, the composer command needs to be mapped:
-      SSHKit.config.command_map[:composer] = "\#{shared_path.join("composer.phar")}"
-    This is best used before deploy:starting:
-      namespace :deploy do
-        before :starting, 'composer:install_executable'
-      end
-  DESC
+  desc "Installs composer to the shared directory"
   task :install_executable do
     on roles fetch(:composer_roles) do
       within fetch(:shared_path) do
-        unless test "[", "-e", "composer.phar", "]"
+        unless test "[", "-e", "#{fetch(:composer_filename)}", "]"
           composer_version = fetch(:composer_version, nil)
           composer_version_option = composer_version ? "-- --version=#{composer_version}" : ""
-          execute :curl, "-s", fetch(:composer_download_url), "|", :php, composer_version_option
+          composer_filename_option = "--  --filename=#{fetch(:composer_filename)}"
+          execute :curl, "-s", fetch(:composer_download_url), "|", :php, composer_version_option, composer_filename_option
         end
       end
     end
@@ -30,7 +17,7 @@ namespace :composer do
     args.with_defaults(:command => :list)
     on roles fetch(:composer_roles) do
       within fetch(:release_path) do
-        execute :composer, args[:command], *args.extras
+        execute "./#{fetch(:composer_filename)}", args[:command], *args.extras
       end
     end
   end
@@ -63,4 +50,15 @@ namespace :composer do
     invoke "composer:run", :selfupdate, fetch(:composer_version, '')
   end
 
+end
+
+
+namespace :load do
+  task :defaults do
+    set :composer_install_flags, '--no-dev --prefer-dist --no-scripts --optimize-autoloader'
+    set :composer_roles, :all
+    set :composer_dump_autoload_flags, '--optimize'
+    set :composer_download_url, "https://getcomposer.org/installer"
+    set :composer_filename, "composer"
+  end
 end
